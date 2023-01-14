@@ -1,4 +1,4 @@
-import { Author, Book } from "@prisma/client";
+import type { Author, Book } from "@prisma/client";
 import { useSession } from "next-auth/react";
 
 type BookWithState = Book & {
