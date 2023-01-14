@@ -15,18 +15,18 @@ const Home: NextPage = () => {
   );
   const books = bookQuery.data;
   const bookMutation = api.book.create.useMutation({
-    onSuccess() {
-      ctx.book.getAll.invalidate();
+    async onSuccess() {
+      await ctx.book.getAll.invalidate();
     },
   });
   const readingListAddMutation = api.book.addToReadingList.useMutation({
-    onSuccess() {
-      ctx.book.userReadingList.invalidate();
+    async onSuccess() {
+      await ctx.book.userReadingList.invalidate();
     },
   });
   const readingListRemoveMutation = api.book.removeToReadingList.useMutation({
-    onSuccess() {
-      ctx.book.userReadingList.invalidate();
+    async onSuccess() {
+      await ctx.book.userReadingList.invalidate();
     },
   });
 
