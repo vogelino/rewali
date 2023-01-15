@@ -31,7 +31,7 @@ const Home: NextPage = () => {
       ]);
       return { prevReadingList };
     },
-    async onError(err, _newBookId, context) {
+    onError(err, _newBookId, context) {
       console.error(err);
       ctx.book.userReadingList.setData(
         "userReadingList",
@@ -51,7 +51,7 @@ const Home: NextPage = () => {
       );
       return { prevReadingList };
     },
-    async onError(err, _newBookId, context) {
+    onError(err, _newBookId, context) {
       console.error(err);
       ctx.book.userReadingList.setData(
         "userReadingList",
