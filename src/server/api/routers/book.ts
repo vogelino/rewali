@@ -59,7 +59,7 @@ export const bookRouter = createTRPCRouter({
         },
       });
     }),
-  removeToReadingList: protectedProcedure
+  removeFromReadingList: protectedProcedure
     .input(z.string())
     .mutation(({ ctx, input }) => {
       return ctx.prisma.user.update({

@@ -5,14 +5,14 @@ import { faker } from "@faker-js/faker";
 
 import { api } from "../utils/api";
 import { BooksList } from "../components/BooksList";
+import { BooksListLoadingSkeleton } from "../components/BooksListLoadingSkeleton";
 
 const Home: NextPage = () => {
   const ctx = api.useContext();
   const session = useSession();
   const bookQuery = api.book.getAll.useQuery();
-  const { data: readingList } = api.book.userReadingList.useQuery(
-    session.data?.user?.id
-  );
+  const { data: readingList, isLoading: readingListLoading } =
+    api.book.userReadingList.useQuery(session.data?.user?.id);
   const books = bookQuery.data;
   const bookMutation = api.book.create.useMutation({
     async onSuccess() {
@@ -20,45 +20,13 @@ const Home: NextPage = () => {
     },
   });
   const readingListAddMutation = api.book.addToReadingList.useMutation({
-    async onMutate(newBookId) {
-      await ctx.book.userReadingList.cancel();
-      const prevReadingList = ctx.book.userReadingList.getData();
-      const newBook = books?.find((b) => b.id === newBookId);
-      if (!newBook) return;
-      ctx.book.userReadingList.setData("userReadingList", () => [
-        ...(prevReadingList || []),
-        newBook,
-      ]);
-      return { prevReadingList };
-    },
-    onError(err, _newBookId, context) {
-      console.error(err);
-      ctx.book.userReadingList.setData(
-        "userReadingList",
-        context?.prevReadingList || []
-      );
-    },
-    async onSettled() {
+    async onSuccess() {
       await ctx.book.userReadingList.invalidate();
     },
   });
-  const readingListRemoveMutation = api.book.removeToReadingList.useMutation({
-    async onMutate(newBookId) {
-      await ctx.book.userReadingList.cancel();
-      const prevReadingList = ctx.book.userReadingList.getData();
-      ctx.book.userReadingList.setData("userReadingList", () =>
-        (prevReadingList || []).filter((b) => b.id !== newBookId)
-      );
-      return { prevReadingList };
-    },
-    onError(err, _newBookId, context) {
-      console.error(err);
-      ctx.book.userReadingList.setData(
-        "userReadingList",
-        context?.prevReadingList || []
-      );
-    },
-    async onSettled() {
+  const readingListRemoveMutation = api.book.removeFromReadingList.useMutation({
+    async onSuccess() {
+      await ctx.book.getAll.invalidate();
       await ctx.book.userReadingList.invalidate();
     },
   });
@@ -85,11 +53,19 @@ const Home: NextPage = () => {
         </header>
         <section>
           <h1 className="mb-8 text-5xl font-extrabold">My reading List</h1>
-          <BooksList
-            books={readingList?.map((b) => ({ ...b, inReadingList: true }))}
-            onBookAdd={addBookToReadingList}
-            onBookRemove={removeBookFromReadingList}
-          />
+          {readingListAddMutation.isLoading ||
+          readingListLoading ||
+          readingListRemoveMutation.isLoading ? (
+            <BooksListLoadingSkeleton
+              itemsCount={(readingList || []).length || 2}
+            />
+          ) : (
+            <BooksList
+              books={readingList?.map((b) => ({ ...b, inReadingList: true }))}
+              onBookAdd={addBookToReadingList}
+              onBookRemove={removeBookFromReadingList}
+            />
+          )}
         </section>
         <section className="my-8 flex flex-wrap items-center justify-between gap-x-8">
           <h1 className="text-5xl font-extrabold">Books</h1>
