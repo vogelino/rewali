@@ -3,7 +3,7 @@ type PropsType = {
 };
 
 export function BooksListLoadingSkeleton({ itemsCount = 4 }: PropsType) {
-  const arrayOfLength = new Array(itemsCount);
+  const arrayOfLength = Array(itemsCount).fill(null);
   return (
     <ul className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {arrayOfLength.map((_, idx) => (
