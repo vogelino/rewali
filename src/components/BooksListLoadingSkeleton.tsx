@@ -3,9 +3,10 @@ type PropsType = {
 };
 
 export function BooksListLoadingSkeleton({ itemsCount = 4 }: PropsType) {
+  const arrayOfLength = new Array(itemsCount);
   return (
     <ul className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {[...new Array(itemsCount)].map((_, idx) => (
+      {arrayOfLength.map((_, idx) => (
         <li key={idx}>
           <div className="aspect-[3/4] animate-pulse bg-slate-100" />
           <section className="p-6">
