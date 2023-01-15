@@ -1,4 +1,4 @@
-import { GetServerSideProps, type NextPage } from "next";
+import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { faker } from "@faker-js/faker";
@@ -20,12 +20,45 @@ const Home: NextPage = () => {
     },
   });
   const readingListAddMutation = api.book.addToReadingList.useMutation({
-    async onSuccess() {
+    async onMutate(newBookId) {
+      await ctx.book.userReadingList.cancel();
+      const prevReadingList = ctx.book.userReadingList.getData();
+      const newBook = books?.find((b) => b.id === newBookId);
+      if (!newBook) return;
+      ctx.book.userReadingList.setData("userReadingList", () => [
+        ...(prevReadingList || []),
+        newBook,
+      ]);
+      return { prevReadingList };
+    },
+    async onError(err, _newBookId, context) {
+      console.error(err);
+      ctx.book.userReadingList.setData(
+        "userReadingList",
+        context?.prevReadingList || []
+      );
+    },
+    async onSettled() {
       await ctx.book.userReadingList.invalidate();
     },
   });
   const readingListRemoveMutation = api.book.removeToReadingList.useMutation({
-    async onSuccess() {
+    async onMutate(newBookId) {
+      await ctx.book.userReadingList.cancel();
+      const prevReadingList = ctx.book.userReadingList.getData();
+      ctx.book.userReadingList.setData("userReadingList", () =>
+        (prevReadingList || []).filter((b) => b.id !== newBookId)
+      );
+      return { prevReadingList };
+    },
+    async onError(err, _newBookId, context) {
+      console.error(err);
+      ctx.book.userReadingList.setData(
+        "userReadingList",
+        context?.prevReadingList || []
+      );
+    },
+    async onSettled() {
       await ctx.book.userReadingList.invalidate();
     },
   });
