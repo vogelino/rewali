@@ -21,18 +21,34 @@ model Book {
   title       String   @unique
   subtitle    String?
   description String?
+  releaseYear Int?
   isbn10      String?  @unique
+  cover       String?
   isbn13      String   @unique
-  authors     Author[]
+  authors     Author[] @relation("BookAuthors")
   inListOf    User[]   @relation("UserReadingLists")
   readBy      User[]   @relation("UserReadBooks")
 }
 
+model Video {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String   @unique
+  description String?
+  releaseYear Int?
+  image       String?
+  authors     Author[] @relation("VideoAuthors")
+  inListOf    User[]   @relation("UserWatchingLists")
+  watchedBy   User[]   @relation("UserWatchedVideos")
+}
+
 model Author {
-  id            String  @id @default(cuid())
-  name          String
-  image         String?
-  authoredBooks Book[]
+  id             String  @id @default(cuid())
+  name           String
+  image          String?
+  authoredBooks  Book[]  @relation("BookAuthors")
+  authoredVideos Video[] @relation("VideoAuthors")
 }
 
 // Necessary for Next auth
@@ -71,7 +87,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
   booksToRead   Book[]    @relation("UserReadingLists")
+  videosToWatch Video[]   @relation("UserWatchingLists")
   readBooks     Book[]    @relation("UserReadBooks")
+  watchedVideos Video[]   @relation("UserWatchedVideos")
 }
 
 model VerificationToken {

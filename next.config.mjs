@@ -13,5 +13,21 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
+        port: '',
+        pathname: '/images/**'
+      },
+      {
+        protocol: 'http',
+        hostname: 'books.google.com',
+        port: '',
+        pathname: '/books/**'
+      }
+    ]
+  }
 };
 export default config;

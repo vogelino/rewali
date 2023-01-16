@@ -1,16 +1,13 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-export const bookRouter = createTRPCRouter({
+export const videoRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
         title: z.string(),
-        isbn13: z.string().optional(),
-        subtitle: z.string().optional(),
         description: z.string().optional(),
-        isbn10: z.string().optional(),
-        cover: z.string().optional(),
+        image: z.string().optional(),
         authors: z
           .array(
             z.union([
@@ -36,7 +33,7 @@ export const bookRouter = createTRPCRouter({
           authors.push(author);
         }
       }
-      return ctx.prisma.book.create({
+      return ctx.prisma.video.create({
         data: {
           ...input,
           authors: {

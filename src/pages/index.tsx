@@ -1,48 +1,31 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { faker } from "@faker-js/faker";
 
 import { api } from "../utils/api";
-import { BooksList } from "../components/BooksList";
-import { BooksListLoadingSkeleton } from "../components/BooksListLoadingSkeleton";
+import { ReWaList } from "../components/ReWaList";
+import { ReWaListLoadingSkeleton } from "../components/ReWaListLoadingSkeleton";
+import Search from "../components/Search/Search";
 
 const Home: NextPage = () => {
   const ctx = api.useContext();
   const session = useSession();
-  const bookQuery = api.book.getAll.useQuery();
-  const { data: readingList, isLoading: readingListLoading } =
-    api.book.userReadingList.useQuery(session.data?.user?.id);
-  const books = bookQuery.data;
-  const bookMutation = api.book.create.useMutation({
+  const { data: reWaList, isLoading: reWaListLoading } =
+    api.reWaList.getReWaList.useQuery(session.data?.user?.id);
+  const reWaListRemoveMutation = api.reWaList.removeFromReWaList.useMutation({
     async onSuccess() {
-      await ctx.book.getAll.invalidate();
-    },
-  });
-  const readingListAddMutation = api.book.addToReadingList.useMutation({
-    async onSuccess() {
-      await ctx.book.userReadingList.invalidate();
-    },
-  });
-  const readingListRemoveMutation = api.book.removeFromReadingList.useMutation({
-    async onSuccess() {
-      await ctx.book.getAll.invalidate();
-      await ctx.book.userReadingList.invalidate();
+      await ctx.reWaList.getReWaList.invalidate();
     },
   });
 
-  const addBookToReadingList = (id: string) => {
-    readingListAddMutation.mutate(id);
-  };
-
-  const removeBookFromReadingList = (id: string) => {
-    readingListRemoveMutation.mutate(id);
+  const removeBookFromReWaList = (id: string, type: "book" | "video") => {
+    reWaListRemoveMutation.mutate({ id, type });
   };
 
   return (
     <>
       <Head>
-        <title>Rewali – Books</title>
+        <title>Rewali – Reading and Watching List</title>
         <meta name="description" content="All books" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -51,63 +34,24 @@ const Home: NextPage = () => {
           <span className="text-2xl font-extrabold">Rewali</span>
           <AuthArea />
         </header>
-        <section>
-          <h1 className="mb-8 text-5xl font-extrabold">My reading List</h1>
-          {readingListAddMutation.isLoading ||
-          readingListLoading ||
-          readingListRemoveMutation.isLoading ? (
-            <BooksListLoadingSkeleton
-              itemsCount={(readingList || []).length || 2}
-            />
-          ) : (
-            <BooksList
-              books={readingList?.map((b) => ({ ...b, inReadingList: true }))}
-              onBookAdd={addBookToReadingList}
-              onBookRemove={removeBookFromReadingList}
-            />
-          )}
-        </section>
-        <section className="my-8 flex flex-wrap items-center justify-between gap-x-8">
-          <h1 className="text-5xl font-extrabold">Books</h1>
-          <button
-            className="rounded-full bg-black px-6 py-3 font-semibold text-white no-underline transition hover:bg-black/80"
-            onClick={() =>
-              bookMutation.mutate({
-                title: faker.random.words(5),
-                subtitle: faker.random.words(10),
-                description: faker.lorem.paragraph(),
-                isbn13: `${faker.datatype.number({
-                  min: 1000000000000,
-                  max: 9999999999999,
-                })}`,
-                isbn10: `${faker.datatype.number({
-                  min: 1000000000,
-                  max: 9999999999,
-                })}`,
-                authors: [
-                  {
-                    name: faker.name.fullName(),
-                    image: faker.internet.avatar(),
-                  },
-                  {
-                    name: faker.name.fullName(),
-                    image: faker.internet.avatar(),
-                  },
-                ],
-              })
-            }
-          >
-            Add random book
-          </button>
-        </section>
-        <BooksList
-          books={books?.map((b) => ({
-            ...b,
-            inReadingList: !!readingList?.find(({ id }) => id === b.id),
-          }))}
-          onBookAdd={addBookToReadingList}
-          onBookRemove={removeBookFromReadingList}
-        />
+        <Search />
+        {session.data && (
+          <section>
+            <h1 className="mb-8 text-5xl font-extrabold">
+              Reading and Watching List
+            </h1>
+            {reWaListLoading || reWaListRemoveMutation.isLoading ? (
+              <ReWaListLoadingSkeleton
+                itemsCount={(reWaList || []).length || 2}
+              />
+            ) : (
+              <ReWaList
+                items={reWaList}
+                onItemRemove={removeBookFromReWaList}
+              />
+            )}
+          </section>
+        )}
       </main>
     </>
   );
