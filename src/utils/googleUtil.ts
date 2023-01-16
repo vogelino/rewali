@@ -71,7 +71,7 @@ export async function searchGoogleBooks(
   searchTerm?: string | null | undefined
 ): Promise<GoogleBooksSearchResultType> {
   if (!searchTerm) return { items: [], kind: "books#volumes", totalItems: 0 };
-  const key = process.env.GOOGLE_API_KEY;
+  const key = process.env.GOOGLE_API_KEY || "";
   const res = await fetch(
     `https://www.googleapis.com/books/v1/volumes?key=${key}&q=${searchTerm}`
   );

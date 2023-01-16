@@ -1,9 +1,9 @@
 import debounce from "lodash.debounce";
 import Image from "next/image";
-import { ChangeEvent, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { api } from "../../utils/api";
-import { GoogleBookApiType } from "../../utils/googleUtil";
-import { IMDBSearchResultType } from "../../utils/imdbUtil";
+import type { GoogleBookApiType } from "../../utils/googleUtil";
+import type { IMDBSearchResultType } from "../../utils/imdbUtil";
 
 export default function Search(): JSX.Element {
   const ctx = api.useContext();
@@ -54,14 +54,11 @@ export default function Search(): JSX.Element {
       ({ type }) => type === "ISBN_10"
     );
     const res = await bookMutation.mutateAsync({
-      authors:
-        result.volumeInfo.authors?.map((name) => ({
-          name,
-        })) || [],
+      authors: result.volumeInfo.authors || [],
       subtitle: result.volumeInfo.subtitle,
       title: result.volumeInfo.title,
-      isbn13: isbn13?.identifier,
-      isbn10: isbn10?.identifier,
+      isbn13: isbn13?.identifier ? +isbn13.identifier : undefined,
+      isbn10: isbn10?.identifier ? +isbn10.identifier : undefined,
       description: result.volumeInfo.description,
       cover: result.volumeInfo.imageLinks.thumbnail,
     });
@@ -88,7 +85,7 @@ export default function Search(): JSX.Element {
               <button
                 key={result.id}
                 className="border-100 grid min-h-[109px] w-full grid-cols-[72px,1fr,auto] items-center border-t text-left transition-colors hover:bg-slate-50"
-                onClick={() => bookClickHandler(result)}
+                onClick={() => void bookClickHandler(result)}
               >
                 <div className="relative h-full overflow-hidden bg-slate-50">
                   {result.volumeInfo.imageLinks?.smallThumbnail && (
@@ -130,7 +127,7 @@ export default function Search(): JSX.Element {
               <button
                 key={result.id}
                 className="border-100 grid min-h-[109px] w-full grid-cols-[72px,1fr,auto] items-center border-t text-left transition-colors hover:bg-slate-50"
-                onClick={() => videoClickHandler(result)}
+                onClick={() => void videoClickHandler(result)}
               >
                 <div className="relative h-full overflow-hidden bg-slate-50">
                   {result.image && (

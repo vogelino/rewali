@@ -1,6 +1,6 @@
-import { Author, Book, Video } from "@prisma/client";
+import type { Author, Book, Video } from "@prisma/client";
 import { z } from "zod";
-import { ReWaListItemType } from "../../../components/ReWaList";
+import type { ReWaListItemType } from "../../../components/ReWaList";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 function rawBookToReWaLiItem(

@@ -23,7 +23,7 @@ export async function searchIMDBItems(
       expression: searchTerm || "",
       searchType: "All",
     };
-  const key = process.env.IMDB_API_KEY;
+  const key = process.env.IMDB_API_KEY || "";
   const res = await fetch(
     `https://imdb-api.com/en/API/SearchTitle/${key}/${searchTerm}`
   );
