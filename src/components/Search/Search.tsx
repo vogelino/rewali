@@ -35,10 +35,15 @@ export default function Search(): JSX.Element {
 
   const videoClickHandler = async (result: IMDBSearchResultType) => {
     setSearchTerm("");
+    const releaseYear = result.description.match(/(19|20)\d{2}/gi);
     const res = await videoMutation.mutateAsync({
       title: result.title,
-      description: result.description,
+      description: result.plot,
       image: result.image,
+      castMembers: result.starList?.map(({ name }) => name) || [],
+      genres: result.genreList?.map(({ value }) => value) || [],
+      releaseYear:
+        releaseYear && releaseYear.length >= 1 ? +releaseYear[0] : undefined,
     });
     await reWaListAddMutation.mutateAsync({
       id: res.id,
@@ -61,6 +66,9 @@ export default function Search(): JSX.Element {
       isbn10: isbn10?.identifier ? +isbn10.identifier : undefined,
       description: result.volumeInfo.description,
       cover: result.volumeInfo.imageLinks.thumbnail,
+      releaseYear: result.volumeInfo.publishedDate
+        ? new Date(result.volumeInfo.publishedDate).getFullYear()
+        : undefined,
     });
     await reWaListAddMutation.mutateAsync({
       id: res.id,
@@ -84,7 +92,7 @@ export default function Search(): JSX.Element {
             {books.map((result) => (
               <button
                 key={result.id}
-                className="border-100 grid min-h-[109px] w-full grid-cols-[72px,1fr,auto] items-center border-t text-left transition-colors hover:bg-slate-50"
+                className="border-100 grid min-h-[121px] w-full grid-cols-[72px,1fr,auto] items-center border-t text-left transition-colors hover:bg-slate-50"
                 onClick={() => void bookClickHandler(result)}
               >
                 <div className="relative h-full overflow-hidden bg-slate-50">
@@ -123,33 +131,46 @@ export default function Search(): JSX.Element {
           </div>
           <div>
             <h3 className="mb-3 text-lg font-bold">Movies</h3>
-            {videos.slice(0, 10).map((result) => (
-              <button
-                key={result.id}
-                className="border-100 grid min-h-[109px] w-full grid-cols-[72px,1fr,auto] items-center border-t text-left transition-colors hover:bg-slate-50"
-                onClick={() => void videoClickHandler(result)}
-              >
-                <div className="relative h-full overflow-hidden bg-slate-50">
-                  {result.image && (
-                    <Image
-                      src={result.image}
-                      alt={`Film cover of "${result.title}"`}
-                      width={78}
-                      height={100}
-                      className="absolute top-0 left-0 object-cover"
-                    />
-                  )}
-                </div>
-                <div className="px-6 py-5">
-                  <h2 className="font-bold leading-tight">{result.title}</h2>
-                  {result.description && (
-                    <h3 className="mt-1 overflow-ellipsis whitespace-nowrap font-serif italic leading-tight text-slate-700">
-                      {result.description}
-                    </h3>
-                  )}
-                </div>
-              </button>
-            ))}
+            {videos.slice(0, 10).map((result) => {
+              const releaseYear = result.description.match(/(19|20)\d{2}/gi);
+              const year =
+                releaseYear && releaseYear.length >= 1
+                  ? +releaseYear[0]
+                  : undefined;
+
+              return (
+                <button
+                  key={result.id}
+                  className="border-100 grid min-h-[121px] w-full grid-cols-[72px,1fr,auto] items-center border-t text-left transition-colors hover:bg-slate-50"
+                  onClick={() => void videoClickHandler(result)}
+                >
+                  <div className="relative h-full overflow-hidden bg-slate-50">
+                    {result.image && (
+                      <Image
+                        src={result.image}
+                        alt={`Film cover of "${result.title}"`}
+                        fill
+                        className="absolute inset-0 object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="px-6 py-5">
+                    <h2 className="font-bold leading-tight">{result.title}</h2>
+                    {result.genres && (
+                      <h3 className="mt-1 inline-block max-w-sm font-serif italic leading-tight text-slate-700">
+                        <span className="block truncate">{result.genres}</span>
+                      </h3>
+                    )}
+                    {result.stars && (
+                      <div className="mt-1 inline-block max-w-sm truncate text-sm">
+                        <p className="truncate">{result.stars}</p>
+                      </div>
+                    )}
+                  </div>
+                  {year && <span className="">{year}</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : null}

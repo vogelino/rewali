@@ -6,40 +6,16 @@ export const videoRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string(),
+        genres: z.array(z.string()).optional(),
         description: z.string().optional(),
         image: z.string().optional(),
-        authors: z
-          .array(
-            z.union([
-              z.string(),
-              z.object({
-                name: z.string(),
-                image: z.string().optional(),
-              }),
-            ])
-          )
-          .optional(),
+        castMembers: z.array(z.string()).optional(),
+        releaseYear: z.number().optional(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const authors = [];
-      for (const author of input.authors || []) {
-        if (typeof author === "string") {
-          const authorObj = await ctx.prisma.author.findUnique({
-            where: { id: author },
-          });
-          if (authorObj) authors.push(authorObj);
-        } else if (author !== null && "name" in author) {
-          authors.push(author);
-        }
-      }
+    .mutation(async ({ ctx, input: data }) => {
       return ctx.prisma.video.create({
-        data: {
-          ...input,
-          authors: {
-            create: authors,
-          },
-        },
+        data,
       });
     }),
 });

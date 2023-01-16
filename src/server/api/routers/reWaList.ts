@@ -1,11 +1,9 @@
-import type { Author, Book, Video } from "@prisma/client";
+import type { Book, Video } from "@prisma/client";
 import { z } from "zod";
 import type { ReWaListItemType } from "../../../components/ReWaList";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
-function rawBookToReWaLiItem(
-  rawBook: Book & { authors: Author[] }
-): ReWaListItemType {
+function rawBookToReWaLiItem(rawBook: Book): ReWaListItemType {
   const additionalInfos = {} as Record<string, string>;
   if (rawBook.isbn10) additionalInfos["ISBN 10"] = rawBook.isbn10;
   if (rawBook.isbn13) additionalInfos["ISBN 13"] = rawBook.isbn13;
@@ -16,21 +14,24 @@ function rawBookToReWaLiItem(
     title: rawBook.title,
     subtitle: rawBook.subtitle || undefined,
     thumbnail: rawBook.cover || undefined,
+    year: String(rawBook.releaseYear) || undefined,
     additionalInfos,
-    authors: rawBook.authors,
+    entitiesInfo: `${rawBook.authors.join(", ")}`,
   };
 }
 
-function rawVideoToReWaLiItem(
-  rawVideo: Video & { authors: Author[] }
-): ReWaListItemType {
+function rawVideoToReWaLiItem(rawVideo: Video): ReWaListItemType {
   return {
     id: rawVideo.id,
     title: rawVideo.title,
+    year: String(rawVideo.releaseYear) || undefined,
     subtitle: rawVideo.description || undefined,
     thumbnail: rawVideo.image || undefined,
     type: "video",
-    authors: rawVideo.authors,
+    additionalInfos: {
+      Genres: rawVideo.genres.join(", "),
+    },
+    entitiesInfo: `${rawVideo.castMembers.join(", ")}`,
   };
 }
 
@@ -46,9 +47,6 @@ export const reWaListRouter = createTRPCRouter({
               id: input,
             },
           },
-        },
-        include: {
-          authors: true,
         },
       };
       const [rawVideos, rawBooks] = await Promise.all([

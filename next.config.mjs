@@ -22,6 +22,12 @@ const config = {
         pathname: '/images/**'
       },
       {
+        protocol: 'https',
+        hostname: 'imdb-api.com',
+        port: '',
+        pathname: '/images/**'
+      },
+      {
         protocol: 'http',
         hostname: 'books.google.com',
         port: '',

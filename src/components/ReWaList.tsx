@@ -1,4 +1,3 @@
-import type { Author } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 
@@ -7,8 +6,9 @@ export interface ReWaListItemType {
   title: string;
   thumbnail?: string;
   subtitle?: string;
-  authors?: Author[];
+  entitiesInfo?: string;
   additionalInfos?: Record<string, string>;
+  year?: string;
   type: "book" | "video";
 }
 
@@ -55,9 +55,7 @@ export const ReWaList = ({
             <h3 className="mb-2 font-serif italic text-slate-600">
               {item.subtitle}
             </h3>
-            {item.authors && item.authors.length > 0 && (
-              <p>By {item.authors?.map(({ name }) => name).join(", ")}</p>
-            )}
+            {item.entitiesInfo && <p>{item.entitiesInfo}</p>}
             {item.additionalInfos &&
               Object.values(item.additionalInfos).length > 0 && (
                 <div className="mt-4">
@@ -69,7 +67,8 @@ export const ReWaList = ({
                 </div>
               )}
           </section>
-          <div className="flex flex-col justify-end">
+          <div className="flex flex-col justify-between">
+            {item.year && <span>{item.year}</span>}
             {session.data?.user && (
               <button
                 className="inline-block aspect-square h-10 w-10 rounded-full bg-black font-semibold text-white no-underline transition hover:bg-black/80"

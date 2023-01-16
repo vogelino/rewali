@@ -25,7 +25,7 @@ model Book {
   isbn10      String?  @unique
   cover       String?
   isbn13      String   @unique
-  authors     Author[] @relation("BookAuthors")
+  authors     String[]
   inListOf    User[]   @relation("UserReadingLists")
   readBy      User[]   @relation("UserReadBooks")
 }
@@ -35,20 +35,14 @@ model Video {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   title       String   @unique
+  genres      String[]
   description String?
   releaseYear Int?
   image       String?
-  authors     Author[] @relation("VideoAuthors")
+  authors     String[]
+  castMembers String[]
   inListOf    User[]   @relation("UserWatchingLists")
   watchedBy   User[]   @relation("UserWatchedVideos")
-}
-
-model Author {
-  id             String  @id @default(cuid())
-  name           String
-  image          String?
-  authoredBooks  Book[]  @relation("BookAuthors")
-  authoredVideos Video[] @relation("VideoAuthors")
 }
 
 // Necessary for Next auth

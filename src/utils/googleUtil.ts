@@ -73,7 +73,9 @@ export async function searchGoogleBooks(
   if (!searchTerm) return { items: [], kind: "books#volumes", totalItems: 0 };
   const key = process.env.GOOGLE_API_KEY || "";
   const res = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?key=${key}&q=${searchTerm}`
+    `https://www.googleapis.com/books/v1/volumes?key=${key}&q=${encodeURIComponent(
+      searchTerm
+    )}`
   );
   const items = (await res.json()) as GoogleBooksSearchResultType;
   return items;
